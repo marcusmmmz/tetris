@@ -340,18 +340,41 @@
 	}}
 />
 
-<div>
+<main>
 	<canvas bind:this={canvas} width={tableWidth} height={tableHeight} />
-</div>
+	<div class="buttons" style="width: {tableWidth}px; height: {tableHeight}px;">
+		<button on:click={currentPiece.moveLeft}> &larr; </button>
+		<div class="buttons-2">
+			<button on:click={currentPiece.rotate}> &#8635; </button>
+			<button on:click={currentPiece.moveDown}> &darr; </button>
+		</div>
+		<button on:click={currentPiece.moveRight}> &rarr; </button>
+	</div>
+</main>
 
 <style>
 	:global(body) {
 		margin: 0;
 	}
-	div {
+	main {
 		display: flex;
-		justify-content: center;
+		flex-direction: column;
 		align-items: center;
 		height: 100vh;
+	}
+
+	.buttons {
+		display: flex;
+	}
+	.buttons-2 {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		width: 100%;
+	}
+	button {
+		font-size: xx-large;
+		height: 100%;
+		width: 100%;
 	}
 </style>
