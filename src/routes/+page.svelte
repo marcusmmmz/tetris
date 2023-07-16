@@ -95,6 +95,8 @@
 		.fill([])
 		.map(() => new Array(gridWidth).fill(undefined));
 
+	let lostGame = false;
+
 	function copyPieceBlocks(piece: number) {
 		let blocks: { x: number; y: number }[] = [];
 
@@ -194,7 +196,7 @@
 	}
 
 	function endGame() {
-		window.location.reload();
+		lostGame = true;
 	}
 
 	function createPiece(type: number) {
@@ -340,23 +342,44 @@
 	}}
 />
 
-<main>
-	<canvas bind:this={canvas} width={tableWidth} height={tableHeight} />
-	<div class="buttons" style="width: {tableWidth}px; height: {tableHeight}px;">
-		<button on:click={currentPiece.moveLeft}> &larr; </button>
-		<div class="buttons-2">
-			<button on:click={currentPiece.rotate}> &#8635; </button>
-			<button on:click={currentPiece.moveDown}> &darr; </button>
+{#if lostGame}
+	<main class="lost-game">
+		<h1>You lost</h1>
+		<button on:click={() => window.location.reload()}> Play again </button>
+	</main>
+{:else}
+	<main class="game">
+		<canvas bind:this={canvas} width={tableWidth} height={tableHeight} />
+		<div
+			class="buttons"
+			style="width: {tableWidth}px; height: {tableHeight}px;"
+		>
+			<button on:click={currentPiece.moveLeft}> &larr; </button>
+			<div class="buttons-2">
+				<button on:click={currentPiece.rotate}> &#8635; </button>
+				<button on:click={currentPiece.moveDown}> &darr; </button>
+			</div>
+			<button on:click={currentPiece.moveRight}> &rarr; </button>
 		</div>
-		<button on:click={currentPiece.moveRight}> &rarr; </button>
-	</div>
-</main>
+	</main>
+{/if}
 
 <style>
 	:global(body) {
 		margin: 0;
 	}
-	main {
+	.lost-game {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		height: 100vh;
+		font-size: xx-large;
+	}
+	.lost-game button {
+		font-size: xx-large;
+	}
+	.game {
 		display: flex;
 		flex-direction: column;
 		align-items: center;
@@ -372,7 +395,7 @@
 		height: 100%;
 		width: 100%;
 	}
-	button {
+	.game button {
 		font-size: xx-large;
 		height: 100%;
 		width: 100%;
