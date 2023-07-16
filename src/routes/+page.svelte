@@ -88,7 +88,7 @@
 
 	let piecesToSelect: number[] = [];
 
-	let currentPiece = createPiece(0);
+	let currentPiece = createPiece(5);
 
 	// 2D array
 	let placedBlockRows: (string | undefined)[][] = new Array(gridHeight)
@@ -235,26 +235,96 @@
 			return getHighestBlock().y - getLowestBlock().y + 1;
 		}
 
+		function getLeftAndRightMostBlocks() {
+			let leftmostBlock = blocks[0];
+			let rightmostBlock = blocks[0];
+
+			for (const block of blocks) {
+				if (block.x > leftmostBlock.x) {
+					leftmostBlock = block;
+				}
+				if (block.x < rightmostBlock.x) {
+					rightmostBlock = block;
+				}
+			}
+
+			return {
+				leftmostBlock,
+				rightmostBlock,
+			};
+		}
+
+		function getWidth() {
+			let { leftmostBlock, rightmostBlock } = getLeftAndRightMostBlocks();
+
+			return leftmostBlock.x - rightmostBlock.x + 1;
+		}
+
 		function isOnFloor() {
 			return pos.y + getLowestBlock().y >= gridHeight - getHeight();
 		}
 
-		function hasBlockBelow() {
+		function wouldCollideWithBlocks(
+			blocks: {
+				x: number;
+				y: number;
+			}[]
+		) {
 			for (const block of blocks) {
-				if (getBlock(pos.x + block.x, pos.y + block.y + 1) != undefined)
+				if (getBlock(pos.x + block.x, pos.y + block.y) != undefined)
 					return true;
 			}
 
 			return false;
 		}
 
+		function wouldCollideIfMovedTo(x: number, y: number) {
+			return wouldCollideWithBlocks(
+				blocks.map((block) => ({
+					x: block.x + x,
+					y: block.y + y,
+				}))
+			);
+		}
+
+		function hasBlockBelow() {
+			return wouldCollideIfMovedTo(0, 1);
+		}
+
 		function isGameOver() {
-			let row = placedBlockRows[getHeight()];
+			let row = placedBlockRows[0];
 
 			for (const block of row) {
 				if (block != undefined) {
 					return true;
 				}
+			}
+		}
+
+		// returns how much of out bounds the piece is and in what direction
+		function getOutOfBounds() {
+			let { leftmostBlock, rightmostBlock } = getLeftAndRightMostBlocks();
+
+			let stuff = -leftmostBlock.x - 1 + getWidth();
+
+			if (pos.x < stuff) {
+				return pos.x - stuff;
+			}
+
+			let stuff2 = gridWidth - (rightmostBlock.x + getWidth());
+
+			if (pos.x > stuff2) {
+				return pos.x - stuff2;
+			}
+
+			return 0;
+		}
+
+		function goBackIfOutOfBounds() {
+			let outOfBounds = getOutOfBounds();
+
+			if (outOfBounds) {
+				pos.x -= outOfBounds;
 			}
 		}
 
@@ -267,14 +337,24 @@
 				}
 			},
 			moveRight() {
+				if (wouldCollideIfMovedTo(1, 0)) {
+					goBackIfOutOfBounds();
+					return;
+				}
+
 				pos.x += 1;
+				goBackIfOutOfBounds();
 			},
 			moveLeft() {
+				if (wouldCollideIfMovedTo(-1, 0)) {
+					goBackIfOutOfBounds();
+					return;
+				}
+
 				pos.x -= 1;
+				goBackIfOutOfBounds();
 			},
 			moveDown() {
-				pos.y += 1;
-
 				if (hasBlockBelow() || isOnFloor()) {
 					for (const block of blocks) {
 						setBlock(pos.x + block.x, pos.y + block.y, PieceTypes[type].color);
@@ -284,6 +364,8 @@
 
 					nextPiece();
 					clearCompletedRows();
+				} else {
+					pos.y += 1;
 				}
 			},
 			rotate() {
@@ -296,7 +378,13 @@
 					});
 				}
 
+				if (wouldCollideWithBlocks(newBlocks)) {
+					return;
+				}
+
 				blocks = newBlocks;
+
+				goBackIfOutOfBounds();
 			},
 		};
 	}
