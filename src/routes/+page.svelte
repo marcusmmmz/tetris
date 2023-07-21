@@ -438,10 +438,7 @@
 {:else}
 	<main class="game">
 		<canvas bind:this={canvas} width={tableWidth} height={tableHeight} />
-		<div
-			class="buttons"
-			style="width: {tableWidth}px; height: {tableHeight}px;"
-		>
+		<div class="buttons" style="width: {tableWidth}px;">
 			<button on:click={currentPiece.moveLeft}> &larr; </button>
 			<div class="buttons-2">
 				<button on:click={currentPiece.rotate}> &#8635; </button>
@@ -471,11 +468,14 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		height: 100vh;
+		height: 100dvh;
 	}
-
+	canvas {
+		height: 80%;
+	}
 	.buttons {
 		display: flex;
+		height: 20%;
 	}
 	.buttons-2 {
 		display: flex;
